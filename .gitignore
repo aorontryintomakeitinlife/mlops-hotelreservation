@@ -1,4 +1,4 @@
-##during push, it ll ignore these files
+
 venv/
 mlruns/
 logs/
