@@ -17,10 +17,11 @@ pipeline{
         stage('setting up our virtual enviroment and installing dependencies') {
             steps {
                 script{
-                    echo 'cloning github repo to jenkins''setting up our virtual enviroment and installing dependencies'
+                    echo 'cloning github repo to jenkins and setting up virtual environment'
+
                     sh '''
                     python -m venv ${VENV_DIR}
-                    ${VENV_DIR}/bin/activated
+                    source ${VENV_DIR}/bin/activate
                     pip install --upgrade pip
                     pip install -e .
                     '''
