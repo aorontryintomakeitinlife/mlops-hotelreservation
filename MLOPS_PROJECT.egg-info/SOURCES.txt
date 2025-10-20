@@ -1,3 +1,4 @@
+README.md
 setup.py
 MLOPS_PROJECT.egg-info/PKG-INFO
 MLOPS_PROJECT.egg-info/SOURCES.txt
