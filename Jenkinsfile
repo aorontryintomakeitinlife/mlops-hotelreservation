@@ -20,10 +20,9 @@ pipeline{
                     echo 'cloning github repo to jenkins and setting up virtual environment'
 
                     sh '''
-                    python -m venv ${VENV_DIR}
-                    source ${VENV_DIR}/bin/activate
-                    pip install --upgrade pip
-                    pip install -e .
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install -r requirements.txt
                     '''
                 }
             }
