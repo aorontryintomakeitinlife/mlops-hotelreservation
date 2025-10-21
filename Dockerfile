@@ -10,10 +10,20 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 ##below WE INSTALLED are lightgbm model dependiceis
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
     libgomp1 \
+    cargo \
+    git \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 ##CODE ALL CODE FROM PROJECT DIRECTORY
 COPY . .
+
+# Upgrade pip, setuptools, wheel to avoid build warnings
+RUN pip install --upgrade pip setuptools wheel
+
+# Install heavy dependencies first to avoid compilation errors
+RUN pip install numpy pandas lightgbm --prefer-binary
 ##no cache dir to avoid taking the pycACHE FILES
 ##BELOW NOW WE INSTALL ALL PACKAGES USING OUR SETUP.PY 
 RUN pip install --no-cache-dir -e .
