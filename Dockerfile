@@ -1,6 +1,6 @@
 ##before this we did our github integration using special key , credentials,a named jenkins pipeline, 
 ##IMPORTED IMAGE
-FROM python:slim
+FROM python:3.11-slim
 
 ##we dont want out environment to oveWrrite our .pyc files fot hat
 
