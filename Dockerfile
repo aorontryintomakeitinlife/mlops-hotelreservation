@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 ##no cache dir to avoid taking the pycACHE FILES
 ##BELOW NOW WE INSTALL ALL PACKAGES USING OUR SETUP.PY 
-RUN pip install --no-cache-dir -e
+RUN pip install --no-cache-dir -e .
 
 ##trainnojg our WHOLE model
 RUN python pipeline/training_pipeline.py
