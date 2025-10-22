@@ -54,5 +54,29 @@ pipeline {
                 }
             }
         }
+        stage('Run training container') {
+            steps {
+                withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                    script {
+                        echo 'Running training container using the latest Docker image...'
+                        sh '''
+                            export PATH=$PATH:${GCLOUD_PATH}
+                            gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+                            gcloud config set project ${GCP_PROJECT}
+
+                            # Pull the latest image from GCR
+                            docker pull gcr.io/${GCP_PROJECT}/ml_project_latest
+
+                            # Run container and mount GCP credentials for access
+                            docker run --rm \
+                                -v ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/key.json:ro \
+                                -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
+                                gcr.io/${GCP_PROJECT}/ml_project_latest
+                        '''
+                    }
+                }
+            }
+        }
+        
     }
 }

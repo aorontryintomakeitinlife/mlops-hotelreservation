@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-##CODE ALL CODE FROM PROJECT DIRECTORY
+##CODE ALL CODE FROM PROJECT DIRECTORY Copy project files into container
 COPY . .
 
 # Upgrade pip, setuptools, wheel to avoid build warnings
@@ -32,7 +32,7 @@ RUN pip install numpy pandas lightgbm pyarrow --prefer-binary
 RUN pip install --no-cache-dir -e .
 
 ##trainnojg our WHOLE model
-RUN python pipeline/training_pipeline.py
+
 ## SERT UP PORT -FLASK APP WILL RUN
 EXPOSE 5000
 #BELOW COMMAND TO RUN APP
