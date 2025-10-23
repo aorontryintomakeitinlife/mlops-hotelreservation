@@ -1,4 +1,8 @@
 pipeline {
+    options {
+        skipStagesAfterUnstable()    
+        disableConcurrentBuilds()    
+    }
     agent any
     environment {
         VENV_DIR="venv"
@@ -70,11 +74,17 @@ pipeline {
                             docker pull gcr.io/${GCP_PROJECT}/ml_project_latest
 
                             # Run container and mount GCP credentials for access
-                            docker run --rm \
-                                -v ${GOOGLE_APPLICATION_CREDENTIALS}:/tmp/key.json:ro \
-                                -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
-                                gcr.io/${GCP_PROJECT}/ml_project_latest
+                            docker run --rm -d --name test_run \
+                            -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/key.json:ro \
+                             -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
+                            gcr.io/${GCP_PROJECT}/ml_project_latest
+                            sleep 10
+                            docker logs test_run
+                            docker stop test_run
                         '''
+                        } finally {
+                    sh 'docker stop test_run || true'
+                }
                     }
                 }
             }
