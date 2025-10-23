@@ -51,8 +51,9 @@ pipeline {
                             gcloud config set project ${GCP_PROJECT}
                             gcloud auth configure-docker --quiet
 
-                            docker build --network=host -t gcr.io/${GCP_PROJECT}/ml_project_latest .
-                            
+                            docker build --platform=linux/amd64 --network=host \
+                                -t gcr.io/${GCP_PROJECT}/ml_project_latest \
+                                --cache-from gcr.io/${GCP_PROJECT}/ml_project_latest .
 
                             docker push gcr.io/${GCP_PROJECT}/ml_project_latest
                         '''
@@ -60,11 +61,12 @@ pipeline {
                 }
             }
         }
+
         stage('Run training container') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     script {
-                        echo 'Running training container using the latest Docker image...'
+                        echo 'Running short-lived training script inside container...'
                         sh '''
                             export PATH=$PATH:${GCLOUD_PATH}
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
@@ -73,25 +75,32 @@ pipeline {
                             # Pull the latest image from GCR
                             docker pull gcr.io/${GCP_PROJECT}/ml_project_latest
 
-                            # Run container and mount GCP credentials for access
-                            docker run --rm -d --name test_run \
+                            # Run a short-lived script instead of the full Flask server
+                            docker run -d --name train_run \
                             -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/key.json:ro \
-                             -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
+                            -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
                             gcr.io/${GCP_PROJECT}/ml_project_latest
-                            sleep 10
-                            docker logs test_run
-                            docker stop test_run
+                            # Wait for container to finish
+                            while [ "$(docker inspect -f '{{.State.Running}}' train_run)" == "true" ]; do
+                                sleep 5
+                            done
+
+                            # Fetch logs
+                            docker logs train_run
+
+                            # Remove container
+                            docker rm train_run
                         '''
-                        
                     }
                 }
             }
         }
-        stage('Deploy to google cloud run') {
+
+        stage('Deploy to Google Cloud Run') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
                     script {
-                        echo 'Deploy to google cloud run...........'
+                        echo 'Deploying to Google Cloud Run...'
                         sh '''
                             export PATH=$PATH:${GCLOUD_PATH}
                             gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
@@ -107,7 +116,5 @@ pipeline {
                 }
             }
         }
-
-        
     }
 }
