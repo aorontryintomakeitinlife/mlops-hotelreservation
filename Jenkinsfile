@@ -82,9 +82,7 @@ pipeline {
                             docker logs test_run
                             docker stop test_run
                         '''
-                        } finally {
-                    sh 'docker stop test_run || true'
-                }
+                        } 
                     }
                 }
             }
