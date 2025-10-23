@@ -48,7 +48,7 @@ pipeline {
                             gcloud auth configure-docker --quiet
 
                             docker build --network=host -t gcr.io/${GCP_PROJECT}/ml_project_latest .
-                            docker tag gcr.io/${GCP_PROJECT}/ml_project_latest
+                            
 
                             docker push gcr.io/${GCP_PROJECT}/ml_project_latest
                         '''
